@@ -1,0 +1,17 @@
+[nats]
+Topic = "push-topic"
+Addrs = "nats://127.0.0.1:4222"
+ConnTimeout = "5s"
+PingInterval = "5s"
+
+[discovery]
+	Server = "pipe"
+	Endpoints = ["http://127.0.0.1:2379"]
+	DIalTimeout = 5
+	Env = "env"
+	AppId = "walle"
+
+
+[comet]
+	RoutineChan = 5
+	RoutineSize = 5

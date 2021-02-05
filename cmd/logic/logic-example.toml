@@ -1,0 +1,28 @@
+[httpServer]
+    Addr = ":3000"
+
+[redis]
+    Addr = "127.0.0.1:6379"
+    MaxIdle = 100
+    MaxActive = 100
+    IdleTimeout = 100
+    DialConnectTimeout = "5s"
+    DialWriteTimeout = "5s"
+    DialReadTimeout = "5s"
+    DialPassword = ""
+    expire = "5m"
+
+[nats]
+    Topic = "push-topic"
+    Addrs = "nats://127.0.0.1:4222"
+    ConnTimeout = "5s"
+    PingInterval = "5s"
+
+[discovery]
+	Server = "logic"
+	Endpoints = ["lcoalhost:2379"]
+	DIalTimeout = 5
+	Env = "env"
+	AppId = "walle"
+[rpcServer]
+    addr = "127.0.0.1:3115"

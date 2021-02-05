@@ -1,0 +1,39 @@
+[discovery]
+	Server = "comet"
+	Endpoints = ["127.0.0.1:2379"]
+	DIalTimeout = 5
+	Env = "env"
+	AppId = "walle"
+
+[tcp]
+    bind = [":3102"]
+    sndBuf = 4096
+    rcvbuf = 4096
+    keepalive = false
+    reader = 32
+    readBuf = 1024
+    readBufSize = 8192
+    writer = 32
+    writeBuf = 1024
+    writeBufSize = 8192
+
+
+[Protocol]
+    timer = 32
+    timerSize = 2048
+    svrProto = 10
+    cliProto = 5
+    handshakeTimeout = "8s"
+
+[bucket]
+    size = 8
+    channel = 30
+    room = 5
+    routineAmount = 5
+    routineSize = 20
+
+[rpcServer]
+    addr = ":3109"
+
+[websocket]
+    bind = ":3120"

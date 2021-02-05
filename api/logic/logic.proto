@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package walle.logic;
+
+option go_package = "walle/api/logic;logic";
+
+import "walle/api/protocol/protocol.proto";
+
+
+message PushMsg{
+  enum TYPE {
+    PUSH = 0;
+    ROOM = 1;
+    BROADCAST = 2;
+  }
+  TYPE type = 1;
+  int32 operation = 2;
+  string server = 3;
+  string room = 4;
+  repeated string keys = 5;
+  bytes msg = 6;
+}
+
+message ConnectReq {
+  string server = 1;
+  string cookie = 2;
+  bytes token = 3;
+}
+
+message Token {
+  int64 mid = 1;
+  string key = 2;
+  string roomID = 3;
+  string Platform = 4;
+  repeated  int32 accepts = 5;
+}
+
+message ConnectReply {
+  int64 mid = 1; // member id
+  string key = 2; // key --> online user id
+  string roomID = 3;
+  repeated int32 accepts = 4;
+  int64  heartbeat = 5;
+}
+
+message DisconnectReq {
+  int64 mid = 1;
+  string key = 2;
+  string server = 3;
+}
+
+message  DisconnectReply {
+  bool done = 1;
+}
+
+message HeartbeatReq {
+  int64  mid = 1;
+  string key = 2;
+  string server = 3;
+}
+
+message  HeartbeatReply {
+
+}
+
+service Logic {
+  rpc Connect(ConnectReq) returns (ConnectReply);
+  rpc Disconnect(DisconnectReq) returns (DisconnectReply);
+  rpc Heartbeat (HeartbeatReq) returns  (HeartbeatReply);
+}

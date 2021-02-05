@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package walle.comet;
+
+option go_package = "walle/api/comet;comet";
+
+import "walle/api/protocol/protocol.proto";
+
+message PushMsgReq {
+  repeated string keys = 1;
+  int32 protoOp = 2;
+  walle.protocol.Proto proto = 3;
+}
+
+message PushMsgReply {}
+
+message BroadcastRoomReq {
+  string roomID = 1;
+  walle.protocol.Proto proto = 2;
+}
+
+message BroadcastRoomReply{}
+
+message BroadcastReq {
+  int32 protoOp = 1;
+  walle.protocol.Proto proto = 2;
+  int32 speed = 3;
+}
+
+message BroadcastReply {}
+
+message RoomsReq {}
+
+message RoomsReply {
+  map<string,bool> rooms = 1;
+}
+
+service Comet {
+  // 单独发送消息
+  rpc PushMsg(PushMsgReq) returns (PushMsgReply);
+  // 全频道广播
+  rpc Broadcast(BroadcastReq) returns (BroadcastReply);
+  // BroadcastRoom 房间广播
+  rpc BroadcastRoom(BroadcastRoomReq) returns (BroadcastRoomReply);
+  // 获取所有房间
+  rpc Rooms(RoomsReq) returns (RoomsReply);
+}
