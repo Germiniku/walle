@@ -51,6 +51,7 @@ func New(conf *conf.Config) *Pipe {
 		conf:        conf,
 		recvMsg:     make(chan *nats.Msg, 1024),
 		cometServer: make(map[string]*Comet),
+		rooms:       make(map[string]*Room),
 	}
 	//go pipe.Register()
 	go pipe.watchComet()

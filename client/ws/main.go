@@ -32,7 +32,7 @@ func main() {
 		client.Authentification()
 		go client.KeepHeartbeat()
 		go client.ReadMessage()
-		client.ChangeRoom("dsb")
+		client.ChangeRoom(client.Key)
 	}
 	for {
 		s := <-c

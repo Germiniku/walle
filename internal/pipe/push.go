@@ -64,6 +64,20 @@ func (p *Pipe) pushKeys(operation int32, serverID string, keys []string, msg []b
 	return
 }
 
+func (p *Pipe) broadcastRoomBy(roomID string, proto *protocol.Proto) (err error) {
+	args := comet.BroadcastRoomReq{
+		RoomID: roomID,
+		Proto:  proto,
+	}
+	for serverID, server := range p.cometServer {
+		if err := server.BroadcastRoom(&args); err != nil {
+			log.Errorf("server.BroadcastRoom(%v) roomID:%s serverID:%s error(%v)", args, roomID, serverID, err)
+		}
+	}
+	log.Infof("broadcastRoom comets:%d", len(p.cometServer))
+	return
+}
+
 func (p *Pipe) broadcastRoomByBatch(roomID string, body []byte) (err error) {
 	args := comet.BroadcastRoomReq{
 		RoomID: roomID,

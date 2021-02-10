@@ -14,7 +14,6 @@ import (
 	"time"
 	"walle/api/protocol"
 	"walle/internal/pipe/conf"
-	"walle/pkg/bytes"
 )
 
 var (
@@ -43,48 +42,11 @@ func newRoom(p *Pipe, roomID string, c *conf.Room) *Room {
 
 // pushproc 向comet推送消息
 func (r *Room) pushproc(batch int, sigTime time.Duration) {
-	var (
-		p    *protocol.Proto
-		n    int
-		last time.Time
-		buf  = bytes.NewWriterSize(int(protocol.MaxBodySize))
-	)
-	log.Infof("start room:%s goroutine", r.roomID)
-	td := time.AfterFunc(sigTime, func() {
-		select {
-		case r.proto <- roomReadyProto:
-		default:
-		}
-	})
-	defer td.Stop()
 	for {
-		if p = <-r.proto; p == nil {
+		p := <-r.proto
+		if err := r.pipe.broadcastRoomBy(r.roomID, p); err != nil {
+			log.Errorf("pipe.broadcastRoomBy error:%v", err)
 			break
-		} else if p != roomReadyProto {
-			// 批量推送消息
-			p.WriteTo(buf)
-			if n++; n == 1 {
-				last = time.Now()
-				td.Reset(sigTime)
-				continue
-			} else if n < batch {
-				if sigTime > time.Since(last) {
-					continue
-				}
-			}
-		} else {
-			if n == 0 {
-				break
-			}
-		}
-		// 向comet推送房间广播消息
-		r.pipe.broadcastRoomByBatch(r.roomID, buf.Buffer())
-		buf = bytes.NewWriterSize(buf.Size())
-		n = 0
-		if r.c.Idle != 0 {
-			td.Reset(time.Duration(r.c.Idle))
-		} else {
-			td.Reset(time.Minute)
 		}
 	}
 	r.pipe.delRoom(r.roomID)
@@ -121,6 +83,7 @@ func (p *Pipe) getRoom(roomID string) *Room {
 	if !ok {
 		p.mutex.Lock()
 		if room, ok = p.rooms[roomID]; !ok {
+			log.Infof("roomID:%s", roomID)
 			room = newRoom(p, roomID, p.conf.Room)
 			p.rooms[roomID] = room
 		}

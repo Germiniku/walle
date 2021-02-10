@@ -34,7 +34,7 @@ func New(c *conf.Config) *Dao {
 		Redis:       NewRedis(c.Redis),
 		Nats:        NewNATS(c.Nats),
 		redisExpire: int32(time.Duration(c.Redis.Expire) / time.Second),
-		DB:          NewDB(c.DB),
+		//DB:          NewDB(c.DB),
 	}
 	if err := dao.Ping(); err != nil {
 		panic(err)

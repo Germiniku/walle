@@ -43,6 +43,7 @@ func (d *Dao) BroadcastRoomMsg(c context.Context, op int32, Type, roomID string,
 		Type:      pb.PushMsg_ROOM,
 		Operation: op,
 		Msg:       msg,
+		Room:      roomID,
 	}
 	bytes, err := proto.Marshal(pushMsg)
 	if err != nil {

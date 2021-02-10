@@ -12,7 +12,6 @@ import "C"
 import (
 	"encoding/json"
 	log "github.com/golang/glog"
-	"github.com/golang/protobuf/proto"
 	"github.com/gorilla/websocket"
 	"net/url"
 	"time"
@@ -82,10 +81,13 @@ func (c *Client) ChangeRoom(roomID string) {
 		err  error
 	)
 	p := pb.Proto{Op: pb.OpChangeRoom, Ver: 1, Seq: 1, Body: []byte(roomID)}
-	if data, err = proto.Marshal(&p); err != nil {
+	if data, err = json.Marshal(&p); err != nil {
 		log.Errorf("proto.Marshal(%v) error:%v", p, err)
 	}
-	c.WriteTextMessage(data)
+	log.Infof("change room msg:%s", string(data))
+	if err = c.Conn.WriteMessage(websocket.BinaryMessage, data); err != nil {
+		log.Infof("write change room error:%v", err)
+	}
 	return
 }
 

@@ -26,13 +26,13 @@ func (d *Dao) InsertChatRecords(c context.Context, records []*model.ChatRecord) 
 }
 
 // 批量发送
-func (d *Dao) SaveChatRecord(c context.Context, kind uint8, keys []string, msg []byte, mids []int64, Type string) {
-	record := &chatRecord{
-		Kind: kind,
-		Keys: keys,
-		Msg:  string(msg),
-		Mids: mids,
-		Type: Type,
-	}
-	record = record
-}
+//func (d *Dao) SaveChatRecord(c context.Context, kind uint8, keys []string, msg []byte, mids []int64, Type string) {
+//	record := &chatRecord{
+//		Kind: kind,
+//		Keys: keys,
+//		Msg:  string(msg),
+//		Mids: mids,
+//		Type: Type,
+//	}
+//	record = record
+//}

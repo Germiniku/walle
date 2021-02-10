@@ -12,7 +12,6 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
-	"github.com/gogo/protobuf/proto"
 	log "github.com/golang/glog"
 	"github.com/gorilla/websocket"
 	"io"
@@ -135,7 +134,8 @@ func (s *Server) watchWebsocketOperate(c context.Context, channel *comet.Channel
 	if _, data, err = conn.ReadMessage(); err != nil {
 		return
 	}
-	if err = proto.Unmarshal(data, &p); err != nil {
+	log.Infof("operation message:%s", string(data))
+	if err = json.Unmarshal(data, &p); err != nil {
 		return
 	}
 	// 处理websocket client端传过来的操作
@@ -160,8 +160,8 @@ func (s *Server) dispatchWebsocket(conn *websocket.Conn, ch *comet.Channel) {
 	var (
 		online int32
 		finish bool
-		data   []byte
-		err    error
+		//data   []byte
+		err error
 	)
 	if conf.Conf.Debug {
 		log.Infof("key:%s start dispatch websocket goroutine", ch.Key)
@@ -179,14 +179,7 @@ func (s *Server) dispatchWebsocket(conn *websocket.Conn, ch *comet.Channel) {
 			for {
 				// 获取logic发送过来的心跳回复
 				p = ch.Ready()
-				if err = proto.Unmarshal(data, p); err != nil {
-					log.Errorf("proto.Unmarshal error:%v", err)
-					continue
-				}
-				data, err = proto.Marshal(p)
-				if err != nil {
-					continue
-				}
+				log.Infof("logic send p:%v", p)
 				// 收到心跳回复则返回心跳信息
 				if p.Op == protocol.OpHeartbeatReply {
 					if ch.Room != nil {
