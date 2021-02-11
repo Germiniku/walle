@@ -48,7 +48,7 @@ func (l *Logic) PushKeys(c context.Context, op int32, keys []string, msg []byte)
 	}
 	for server := range pushKeys {
 		log.Infof("op:%d server:%s keys:%v msg:%s", op, server, keys, string(msg))
-		if err = l.dao.PushMsg(c, op, server, keys, msg); err != nil {
+		if err = l.dao.MQ.PushMsg(c, op, server, keys, msg); err != nil {
 			return
 		}
 	}
@@ -69,7 +69,7 @@ func (l *Logic) PushMids(c context.Context, op int32, mids []int64, msg []byte) 
 		keys[server] = append(keys[server], key)
 	}
 	for server, keys := range keys {
-		if err = l.dao.PushMsg(c, op, server, keys, msg); err != nil {
+		if err = l.dao.MQ.PushMsg(c, op, server, keys, msg); err != nil {
 			return
 		}
 	}
@@ -77,11 +77,11 @@ func (l *Logic) PushMids(c context.Context, op int32, mids []int64, msg []byte) 
 }
 
 func (l *Logic) PushAll(c context.Context, op int32, msg []byte) (err error) {
-	return l.dao.BroadcastMsg(c, op, msg)
+	return l.dao.MQ.BroadcastMsg(c, op, msg)
 }
 
 func (l *Logic) PushRoom(c context.Context, op int32, Type, roomId string, msg []byte) (err error) {
-	return l.dao.BroadcastRoomMsg(c, op, Type, roomId, msg)
+	return l.dao.MQ.BroadcastRoomMsg(c, op, Type, roomId, msg)
 }
 
 // chatRecord 存储聊天记录
