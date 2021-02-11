@@ -5,7 +5,9 @@ go 1.14
 require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/Germiniku/discovery v0.0.0-20210129034110-123345614d3c
+	github.com/Shopify/sarama v1.19.0
 	github.com/Terry-Mao/goim v0.0.0-20201207141630-a659457af68a
+	github.com/bsm/sarama-cluster v2.1.15+incompatible
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
 	github.com/gogo/protobuf v1.3.1

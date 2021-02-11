@@ -12,9 +12,10 @@
     DialPassword = ""
     expire = "5m"
 
-[nats]
+[mq]
+    mode = "nats" # kafka or nats
     Topic = "push-topic"
-    Addrs = "nats://127.0.0.1:4222"
+    Addrs = ["nats://127.0.0.1:4222"]
     ConnTimeout = "5s"
     PingInterval = "5s"
 

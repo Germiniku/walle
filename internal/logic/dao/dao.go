@@ -13,26 +13,30 @@ import (
 	"fmt"
 	log "github.com/golang/glog"
 	"github.com/gomodule/redigo/redis"
-	"github.com/nats-io/nats.go"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
 	"walle/internal/logic/conf"
+	"walle/internal/logic/dao/mq"
 )
 
 type Dao struct {
 	conf        *conf.Config
 	Redis       *redis.Pool
-	Nats        *nats.Conn
+	MQ          mq.MQ
 	redisExpire int32
 	DB          *mongo.Database
 }
 
 func New(c *conf.Config) *Dao {
+	mq, err := mq.New(c.MQ)
+	if err != nil {
+		panic(err)
+	}
 	dao := &Dao{
 		conf:        c,
 		Redis:       NewRedis(c.Redis),
-		Nats:        NewNATS(c.Nats),
+		MQ:          mq,
 		redisExpire: int32(time.Duration(c.Redis.Expire) / time.Second),
 		//DB:          NewDB(c.DB),
 	}
@@ -61,19 +65,6 @@ func NewDB(conf *conf.DB) *mongo.Database {
 	}
 	log.Infof("logic connect Mongo Success")
 	return client.Database(conf.DB)
-}
-
-func NewNATS(conf *conf.Nats) *nats.Conn {
-	conn, err := nats.Connect(conf.Addrs,
-		nats.Timeout(time.Duration(conf.ConnTimeout)),
-		nats.PingInterval(time.Duration(conf.PingInterval)*time.Second),
-	)
-	if err != nil {
-		fmt.Println("nats addr:", conf.Addrs)
-		panic(err)
-	}
-	log.Infof("logic connect Nats Success")
-	return conn
 }
 
 func NewRedis(conf *conf.Redis) *redis.Pool {
@@ -108,7 +99,7 @@ func (d *Dao) Ping() (err error) {
 	return nil
 }
 
-func (d *Dao) Close() error {
-	d.Nats.Close()
-	return d.Redis.Close()
+func (d *Dao) Close() {
+	d.MQ.Close()
+	d.Redis.Close()
 }

@@ -38,7 +38,7 @@ func Default() *Config {
 
 type Config struct {
 	HTTPServer *HTTPServer
-	Nats       *Nats
+	MQ         *MQ
 	Redis      *Redis
 	Discovery  *Discovery
 	RpcServer  *RpcServer
@@ -90,9 +90,10 @@ type Redis struct {
 	DialReadTimeout    xtime.Duration
 }
 
-type Nats struct {
+type MQ struct {
+	Addrs        []string
 	Topic        string
-	Addrs        string
+	Mode         string
 	ConnTimeout  xtime.Duration
 	PingInterval xtime.Duration
 }

@@ -9,44 +9,37 @@
 package dao
 
 import (
-	"fmt"
 	"github.com/Germiniku/discovery"
+	log "github.com/golang/glog"
 	"github.com/nats-io/nats.go"
-	"time"
 	"walle/internal/pipe/conf"
+	"walle/internal/pipe/dao/mq"
 )
 
 type Dao struct {
 	conf      *conf.Config
-	Nats      *nats.Conn
+	MQ        mq.MQ
 	sub       *nats.Subscription
 	Discovery discovery.Server
 }
 
 func New(c *conf.Config) *Dao {
+
 	cfg := discovery.NewConfig(c.Discovery.Endpoints, c.Discovery.DIalTimeout, c.Discovery.Env, c.Discovery.AppId, "")
 	discoverySrv, err := discovery.New("etcd", cfg)
 	if err != nil {
 		panic(err)
 	}
+	mq, err := mq.New(c.MQ)
+	if err != nil {
+		log.Errorf("MQ Initial error:%v", err)
+	}
 	dao := &Dao{
 		conf:      c,
-		Nats:      NewNats(c.Nats),
+		MQ:        mq,
 		Discovery: discoverySrv,
 	}
 	return dao
-}
-
-func NewNats(conf *conf.Nats) *nats.Conn {
-	conn, err := nats.Connect(conf.Addrs,
-		nats.Timeout(time.Duration(conf.ConnTimeout)),
-		nats.PingInterval(time.Duration(conf.PingInterval)*time.Second),
-	)
-	if err != nil {
-		fmt.Println("nats addr:", conf.Addrs)
-		panic(err)
-	}
-	return conn
 }
 
 func (d *Dao) Ping() error {
@@ -54,6 +47,5 @@ func (d *Dao) Ping() error {
 }
 
 func (d *Dao) Close() error {
-	d.Nats.Close()
 	return nil
 }

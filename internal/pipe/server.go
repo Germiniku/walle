@@ -11,6 +11,7 @@ package pipe
 import (
 	"encoding/json"
 	"fmt"
+	cluster "github.com/bsm/sarama-cluster"
 	log "github.com/golang/glog"
 	"github.com/golang/protobuf/proto"
 	"github.com/nats-io/nats.go"
@@ -32,7 +33,6 @@ import (
 type Pipe struct {
 	conf        *conf.Config
 	dao         *dao.Dao
-	recvMsg     chan *nats.Msg
 	cometServer map[string]*Comet
 	rooms       map[string]*Room
 	server      *server.Server
@@ -49,7 +49,6 @@ func New(conf *conf.Config) *Pipe {
 	pipe := &Pipe{
 		dao:         dao.New(conf),
 		conf:        conf,
-		recvMsg:     make(chan *nats.Msg, 1024),
 		cometServer: make(map[string]*Comet),
 		rooms:       make(map[string]*Room),
 	}
@@ -124,28 +123,55 @@ func (p *Pipe) Run() {
 
 // worker 订阅消息并消费消息
 func (p *Pipe) worker() {
-	subject := protocol.PackagePublishKey(p.conf.Nats.Topic, "*")
-	p.dao.RecvMessage(subject, p.recvMsg)
-	go p.consume()
-}
-
-// consume 消费消息
-func (p *Pipe) consume() {
-	for {
-		msg := <-p.recvMsg
-		var m pb.PushMsg
-		if err := proto.Unmarshal(msg.Data, &m); err != nil {
-			log.Errorf("[worker] proto.Unmarshal err:%v", err)
-			continue
-		}
-		log.Infof("keys:%v operation:%d msg:%s type:%d", m.Keys, m.Operation, string(m.Msg), m.Type)
-		// TODO: 这里应该使用线程池
-		p.push(&m)
+	subject := protocol.PackagePublishKey(p.conf.MQ.Topic, "*")
+	consumer, natsChannel := p.dao.MQ.Subcribe(subject)
+	switch p.conf.MQ.Mode {
+	case "nats":
+		go p.natsConsume(natsChannel)
+	case "kafka":
+		go p.kafkaConsume(consumer)
+	default:
+		go p.kafkaConsume(consumer)
 	}
 }
 
+func (p *Pipe) kafkaConsume(consumer *cluster.Consumer) {
+	for {
+		select {
+		case err := <-consumer.Errors():
+			log.Errorf("consumer error:%v", err)
+		case n := <-consumer.Notifications():
+			log.Infof("consumer rebalanced:%v", n)
+		case msg, ok := <-consumer.Messages():
+			if !ok {
+				return
+			}
+			consumer.MarkOffset(msg, "")
+			p.consume(msg.Value)
+		}
+	}
+}
+
+// natsConsume nats消费消息
+func (p *Pipe) natsConsume(channel chan *nats.Msg) {
+	for {
+		msg := <-channel
+		p.consume(msg.Data)
+	}
+}
+
+func (p *Pipe) consume(data []byte) {
+	var m pb.PushMsg
+	if err := proto.Unmarshal(data, &m); err != nil {
+		log.Errorf("[worker] proto.Unmarshal err:%v", err)
+		return
+	}
+	log.Infof("keys:%v operation:%d msg:%s type:%d", m.Keys, m.Operation, string(m.Msg), m.Type)
+	// TODO: 这里应该使用线程池
+	p.push(&m)
+}
+
 func (p *Pipe) Close() {
-	close(p.recvMsg)
 	p.dao.Close()
 	return
 }

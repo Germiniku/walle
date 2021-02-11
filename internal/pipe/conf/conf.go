@@ -37,7 +37,7 @@ func Default() *Config {
 }
 
 type Config struct {
-	Nats      *Nats
+	MQ        *MQ
 	Comet     *Comet
 	Discovery *Discovery
 	Room      *Room
@@ -57,9 +57,11 @@ type Discovery struct {
 	AppId       string
 }
 
-type Nats struct {
+type MQ struct {
+	Mode         string
 	Topic        string
-	Addrs        string
+	Group        string
+	Brokers      []string
 	ConnTimeout  xtime.Duration
 	PingInterval xtime.Duration
 }

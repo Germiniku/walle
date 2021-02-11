@@ -2,12 +2,18 @@
 
 Walle来自于机器人总动员
 
-
 ![avatar](https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=3370454460,1552705626&fm=26&gp=0.jpg)
 
 golang实现的消息推送系统(目前只实现了websocket)，场景参考: 直播的弹幕系统
 
-rpc框架使用rpcx，注册中心使用etcd，消息队列暂时使用(nats 部署方便),生产建议使用Kafka
+> rpc框架使用rpcx
+>
+> 注册中心使用etcd
+>
+> 消息队列支持
+>> kafka (生产推荐)
+>>
+>> nats (部署方便 轻量 测试推荐)
 
 > 目前实现内容:
 > 1. 单独私聊消息
@@ -15,10 +21,7 @@ rpc框架使用rpcx，注册中心使用etcd，消息队列暂时使用(nats 部
 > 3. 全频道广播消息
 
 > 计划内容:
-> 1. 实现聊天记录批量存储MongoDB(待测试)
-> 2. 消息队列添加Kafka实现
-> 3. 并发测试
-> 4. 消息有序
+> 1. 实现消息推送过程中的中间件
 
 ![avatar](https://github.com/Germiniku/walle/blob/main/assets/process.png)
 
