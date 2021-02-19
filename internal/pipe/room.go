@@ -44,7 +44,7 @@ func newRoom(p *Pipe, roomID string, c *conf.Room) *Room {
 func (r *Room) pushproc(batch int, sigTime time.Duration) {
 	for {
 		p := <-r.proto
-		if err := r.pipe.broadcastRoomBy(r.roomID, p); err != nil {
+		if err := r.pipe.broadcastRoomByBatch(r.roomID, p); err != nil {
 			log.Errorf("pipe.broadcastRoomBy error:%v", err)
 			break
 		}

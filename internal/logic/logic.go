@@ -25,10 +25,6 @@ logic
 负责发送msg到kafka
 */
 
-/**
-	TODO: 完成rpc server
- 	1.实现comet调用logic connect
-*/
 type Logic struct {
 	c   *conf.Config
 	dao *dao.Dao
