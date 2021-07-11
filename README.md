@@ -45,6 +45,6 @@ mid: {
 rpc调用logic给在线会话信息添加过期时间
 ```
 
-本项目目前仅供参考，仅供测试学习。借鉴于bilibili曹大的goim
+本项目目前仅供参考，仅供测试学习。借鉴于bilibili毛剑的goim
 
 部署方法cmd目录下的comet、logic、pipe文件编译运行，环境依赖etcd
